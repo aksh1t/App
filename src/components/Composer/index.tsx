@@ -69,7 +69,7 @@ function Composer(
         },
         isReportActionCompose = false,
         isComposerFullSize = false,
-        shouldContainScroll = false,
+        shouldContainScroll = true,
         isGroupPolicyReport = false,
         ...props
     }: ComposerProps,
@@ -242,6 +242,19 @@ function Composer(
         };
     }, []);
 
+    useEffect(() => {
+        if (!textInput.current) {
+            return;
+        }
+        const blockScroll = (event) => {
+            event.stopPropagation();
+        };
+        textInput.current.addEventListener('wheel', blockScroll, { passive: false });
+        return () => {
+            textInput.current?.removeEventListener('wheel', blockScroll);
+        };
+    }, []);
+    
     useEffect(() => {
         if (!textInput.current || prevScroll === undefined) {
             return;
