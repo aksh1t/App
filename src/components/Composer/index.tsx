@@ -246,9 +246,21 @@ function Composer(
         if (!textInput.current) {
             return;
         }
-        const blockScroll = (event) => {
-            event.stopPropagation();
-        };
+        const blockScroll = ((e: MouseEvent) => {
+            if (!textInput.current) {
+                return;
+            }
+            const isAtTop = textInput.current.scrollTop === 0;
+            if (isAtTop && e.deltaY < 0) {
+                return;
+            }
+            const isAtBottom = textInput.current.scrollHeight - textInput.current.clientHeight === textInput.current.scrollTop;
+            if (isAtBottom && e.deltaY > 0) {
+                return;
+            }
+            e.stopPropagation();
+        });
+
         textInput.current.addEventListener('wheel', blockScroll, { passive: false });
         return () => {
             textInput.current?.removeEventListener('wheel', blockScroll);
