@@ -22,9 +22,12 @@ type VideoPlayerThumbnailProps = {
 
     /** Accessibility label for the thumbnail. */
     accessibilityLabel: string;
+
+    /** Callback executed when the thumbnail is loaded. */
+    onThumbnailLoad?: (event: any) => void;
 };
 
-function VideoPlayerThumbnail({thumbnailUrl, onPress, accessibilityLabel}: VideoPlayerThumbnailProps) {
+function VideoPlayerThumbnail({thumbnailUrl, onPress, accessibilityLabel, onThumbnailLoad}: VideoPlayerThumbnailProps) {
     const styles = useThemeStyles();
 
     return (
@@ -33,9 +36,10 @@ function VideoPlayerThumbnail({thumbnailUrl, onPress, accessibilityLabel}: Video
                 <View style={styles.flex1}>
                     <Image
                         source={{uri: thumbnailUrl}}
-                        style={styles.flex1}
+                        style={[styles.flex1, styles.overflowHidden, {borderRadius: variables.componentBorderRadiusNormal}]}
                         // The auth header is required except for static images on Cloudfront, which makes them fail to load
                         isAuthTokenRequired={!CONST.CLOUDFRONT_DOMAIN_REGEX.test(thumbnailUrl)}
+                        onLoad={onThumbnailLoad}
                     />
                 </View>
             )}

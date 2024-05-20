@@ -62,6 +62,11 @@ function VideoPlayerPreview({videoUrl, thumbnailUrl, reportID, fileName, videoDi
         }
     };
 
+    const handleThumbnailLoad = (event) => {
+        const {width, height} = event.nativeEvent;
+        setMeasuredDimensions({width: width, height: height});
+    };
+
     useEffect(() => {
         if (videoUrl !== currentlyPlayingURL || reportID !== currentlyPlayingURLReportID) {
             return;
@@ -76,6 +81,7 @@ function VideoPlayerPreview({videoUrl, thumbnailUrl, reportID, fileName, videoDi
                     thumbnailUrl={thumbnailUrl}
                     onPress={handleOnPress}
                     accessibilityLabel={fileName}
+                    onThumbnailLoad={handleThumbnailLoad}
                 />
             ) : (
                 <View style={styles.flex1}>
