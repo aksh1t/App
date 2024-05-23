@@ -242,30 +242,54 @@ function Composer(
         };
     }, []);
 
+    const [blockScroll, setBlockScroll] = useState(false);
+    const lastMousePositionRef = useRef({ x: 0, y: 0 });
+
     useEffect(() => {
-        if (!textInput.current) {
-            return;
-        }
-        const blockScroll = ((e: MouseEvent) => {
-            if (!textInput.current) {
-                return;
+        const setBlockScrollTrue = lodashDebounce(() => {
+            setBlockScroll(true);
+        }, 300);
+        const handleMouseEnter = () => {
+            setBlockScroll(true);
+        };
+        const handleMouseLeave = () => {
+            setBlockScroll(false);
+        };
+        const handleMouseMove = (e: MouseEvent) => {
+            const currentX = e.clientX;
+            const currentY = e.clientY;
+            const lastX = lastMousePositionRef.current.x;
+            const lastY = lastMousePositionRef.current.y;
+            const distance = Math.sqrt(((currentX - lastX) ** 2) + ((currentY - lastY) ** 2));
+
+            if (distance > 20) { // Check if moved more than 20 pixels
+                lastMousePositionRef.current = { x: currentX, y: currentY };
+                setBlockScroll(false);
+                setBlockScrollTrue.cancel(); // Cancel any pending debounce calls
+                setBlockScrollTrue(); // Reset the debounce timer
             }
-            const isAtTop = textInput.current.scrollTop === 0;
-            if (isAtTop && e.deltaY < 0) {
-                return;
-            }
-            const isAtBottom = textInput.current.scrollHeight - textInput.current.clientHeight === textInput.current.scrollTop;
-            if (isAtBottom && e.deltaY > 0) {
+        };
+        const handleWheel = (e: MouseEvent) => {
+            if (!blockScroll) {
+                e.preventDefault();
                 return;
             }
             e.stopPropagation();
-        });
-
-        textInput.current.addEventListener('wheel', blockScroll, { passive: false });
-        return () => {
-            textInput.current?.removeEventListener('wheel', blockScroll);
         };
-    }, []);
+
+        textInput.current?.addEventListener('mousemove', handleMouseMove);
+        textInput.current?.addEventListener('mouseenter', handleMouseEnter);
+        textInput.current?.addEventListener('mouseleave', handleMouseLeave);
+        textInput.current?.addEventListener('wheel', handleWheel, { passive: false });
+
+        return () => {
+            textInput.current?.removeEventListener('mousemove', handleMouseMove);
+            textInput.current?.removeEventListener('mouseenter', handleMouseEnter);
+            textInput.current?.removeEventListener('mouseleave', handleMouseLeave);
+            textInput.current?.removeEventListener('wheel', handleWheel);
+            setBlockScrollTrue.cancel(); // Ensure to cancel the debounced call on cleanup
+        };
+    }, [blockScroll]);
     
     useEffect(() => {
         if (!textInput.current || prevScroll === undefined) {
